@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>ludo</title>
+
+<style>
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+    font-family: sans-serif;
+  }
+
+  /* Top bar */
+  #topbar {
+    height: 40px;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 10px;
+    gap: 10px;
+  }
+
+  #topbar button {
+    height: 28px;
+    padding: 0 12px;
+    background: #444;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
+
+  #topbar button:hover {
+    background: #666;
+  }
+
+  /* Game area */
+  #game-container {
+    width: 100%;
+    height: calc(100vh - 40px);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: black;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+  <button onclick="toggleAudio()" id="muteBtn">🔇 MUTE</button>
+  <button onclick="Module.requestFullscreen(false, false)">⛶ FULLSCREEN</button>
+</div>
+
+<div id="game-container">
+  <canvas id="canvas" tabindex="-1"></canvas>
+</div>
+
+<script>
+var Module = {
+  canvas: document.getElementById('canvas'),
+  print: function() {},
+  printErr: function() {}
+};
+</script>
+
+<script>
+/* --- Simple Audio Toggle --- */
+const audioContexts = [];
+
+(function() {
+  self.AudioContext = new Proxy(self.AudioContext, {
+    construct(target, args) {
+      const ctx = new target(...args);
+      audioContexts.push(ctx);
+      return ctx;
+    }
+  });
+})();
+
+function toggleAudio() {
+  let resumed = false;
+  audioContexts.forEach(ctx => {
+    if (ctx.state === "suspended") {
+      ctx.resume();
+      resumed = true;
+    } else if (ctx.state === "running") {
+      ctx.suspend();
+    }
+  });
+
+  document.getElementById("muteBtn").textContent =
+    resumed ? "🔇 MUTE" : "🔈 RESUME";
+}
+</script>
+
+<script async type="text/javascript" src="leapingludo.js"></script>
+
+</body>
+</html>
